@@ -3,7 +3,7 @@
 all: clean build
 
 clean:
-		rm -f *.svg *.png
+	@xargs -t rm -rf <.gitignore
 
 build:
 	python barcode-gen.py
