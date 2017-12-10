@@ -2,6 +2,7 @@
 import time
 import argparse
 import re
+import subprocess
 
 import code128
 
@@ -36,9 +37,14 @@ style="fill:black;font-size:16pt;text-anchor:middle;"
 </g>
 </svg>"""
 for (dashed_code, code) in zip(dashed_codes, codes):
-    out_file = code+".svg"
+    svg_file = code+'.svg'
+    png_file = code+'.png'
     svg = code128.svg(code)
 
-    with open(out_file,'w') as o:
+    # Generate the svg
+    with open(svg_file,'w') as file:
         svg_content = "\n".join(svg.split("\n")[3:-2])
-        print(template.format(bar=svg_content,code=dashed_code),file=o)
+        print(template.format(bar=svg_content,code=dashed_code),file=file)
+
+    # Convert to png
+    subprocess.check_call(['inkscape', svg_file, '--export-png='+png_file, '--export-width=991', '--export-height=306']);
