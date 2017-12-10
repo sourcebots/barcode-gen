@@ -1,17 +1,21 @@
-import code128
+#!/usr/bin/env python3
 import time
-filename = "/tmp/temp"
+import argparse
+import re
 
-codes = ["20883877",
-"61494426",
-"16258484",
-"44428990",
-"33843214",
-"30889372",
-"16963560",
-"92719895",
-"49698370",
-"58312542"]
+import code128
+
+parser = argparse.ArgumentParser()
+parser.add_argument('codes', metavar='NNNNNNNN', nargs='+', help="list of codes to generate (with or without dashes)")
+args = parser.parse_args()
+
+# sanitise codes, so we can support both with and without dashes.
+codes = [re.sub(r'[^0-9]','',code) for code in args.codes]
+dashed_codes = ["-".join([code[0:2],code[2:4],code[4:6],code[6:8]]) for code in codes]
+
+for code in codes:
+    if len(code) != 8:
+        raise Exception("Invalid code length: {}, should be 8 digits long".format(code))
 
 template = """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg
@@ -31,11 +35,10 @@ style="fill:black;font-size:16pt;text-anchor:middle;"
 </text>
 </g>
 </svg>"""
-for code in codes:
+for (dashed_code, code) in zip(dashed_codes, codes):
     out_file = code+".svg"
-    code_with_dashes = "-".join([code[0:2],code[2:4],code[4:6],code[6:8]])
     svg = code128.svg(code)
 
     with open(out_file,'w') as o:
         svg_content = "\n".join(svg.split("\n")[3:-2])
-        print(template.format(bar=svg_content,code=code_with_dashes),file=o)
+        print(template.format(bar=svg_content,code=dashed_code),file=o)
