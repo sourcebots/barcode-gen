@@ -1,9 +1,6 @@
-import barcode
 import code128
 import time
 filename = "/tmp/temp"
-
-# EAN = barcode.get_barcode_class('code-128')
 
 codes = ["20883877",
 "61494426",
@@ -35,14 +32,10 @@ style="fill:black;font-size:16pt;text-anchor:middle;"
 </g>
 </svg>"""
 for code in codes:
-    # for code in codes:=
-    # ean = EAN(code)
-    # file_name = ean.save(filename)
     out_file = code+".svg"
     code_with_dashes = "-".join([code[0:2],code[2:4],code[4:6],code[6:8]])
-    svg = code128.svg(code_with_dashes)
+    svg = code128.svg(code)
 
     with open(out_file,'w') as o:
-        # with open(file_name) as f:
         svg_content = "\n".join(svg.split("\n")[3:-2])
         print(template.format(bar=svg_content,code=code_with_dashes),file=o)
