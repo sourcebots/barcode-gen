@@ -11,7 +11,7 @@ args = parser.parse_args()
 
 # sanitise codes, so we can support both with and without dashes.
 codes = [re.sub(r'[^0-9]','',code) for code in args.codes]
-dashed_codes = ["-".join([code[0:2],code[2:4],code[4:6],code[6:8]]) for code in codes]
+dashed_codes = ["sb-"+"-".join([code[0:2],code[2:4],code[4:6],code[6:8]]) for code in codes]
 
 for code in codes:
     if len(code) != 8:
@@ -21,19 +21,14 @@ template = """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg
   PUBLIC '-//W3C//DTD SVG 1.1//EN'
   'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
-<svg height="29.000mm" version="1.1" width="90.300mm" xmlns="http://www.w3.org/2000/svg">
-<g transform="translate(-10,0) scale(0.7, 1.2)">
-{bar}
-</g>
-<g>
+<svg height="7mm" version="1.1" width="62mm" xmlns="http://www.w3.org/2000/svg">
 <text
-x="255"
-y="61"
-style="fill:black;font-size:16pt;text-anchor:middle;"
+x="10"
+y="20"
+style="fill:black;font-size:13pt;text-anchor:left;"
 >
 {code}
 </text>
-</g>
 </svg>"""
 for (dashed_code, code) in zip(dashed_codes, codes):
     out_file = code+".svg"
@@ -41,4 +36,4 @@ for (dashed_code, code) in zip(dashed_codes, codes):
 
     with open(out_file,'w') as o:
         svg_content = "\n".join(svg.split("\n")[3:-2])
-        print(template.format(bar=svg_content,code=dashed_code),file=o)
+        print(template.format(code=dashed_code),file=o)
