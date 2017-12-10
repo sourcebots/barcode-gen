@@ -2,6 +2,7 @@
 import time
 import argparse
 import re
+import os
 import subprocess
 
 import code128
@@ -37,6 +38,7 @@ style="fill:black;font-size:16pt;text-anchor:middle;"
 </g>
 </svg>"""
 for (dashed_code, code) in zip(dashed_codes, codes):
+    print("Generating code:",dashed_code)
     svg_file = code+'.svg'
     png_file = code+'.png'
     svg = code128.svg(code)
@@ -47,4 +49,7 @@ for (dashed_code, code) in zip(dashed_codes, codes):
         print(template.format(bar=svg_content,code=dashed_code),file=file)
 
     # Convert to png
-    subprocess.check_call(['inkscape', svg_file, '--export-png='+png_file, '--export-width=991', '--export-height=306']);
+    command = ['inkscape', svg_file, '--export-png='+png_file, '--export-width=991', '--export-height=306']
+    err = subprocess.check_call(command,stdout=open(os.devnull,'w'),stderr=subprocess.STDOUT);
+    if err != 0:
+        raise Exception("Inkscape returned non-zero error code, command was:",command)
