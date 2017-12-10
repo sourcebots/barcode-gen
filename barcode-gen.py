@@ -2,11 +2,14 @@
 import time
 import argparse
 import re
+import os
+import sys
 
 import code128
 
 parser = argparse.ArgumentParser()
 parser.add_argument('codes', metavar='NNNNNNNN', nargs='+', help="list of codes to generate (with or without dashes)")
+parser.add_argument('-L', '--no-logo', dest="with_logo", default=True, action="store_false", help="don't include the logo on the label")
 args = parser.parse_args()
 
 # sanitise codes, so we can support both with and without dashes.
@@ -17,6 +20,17 @@ for code in codes:
     if len(code) != 8:
         raise Exception("Invalid code length: {}, should be 8 digits long".format(code))
 
+if args.with_logo:
+    logo_file = os.path.join(os.path.dirname(__file__), "art", "SourceBots.svg")
+    if not os.path.exists(logo_file):
+        print("could not find logo SVG at {}".format(logo_file), file=sys.stderr)
+        print("(have you run `git submodule update --init`?)", file=sys.stderr)
+        sys.exit(1)
+    with open(logo_file, "r") as f:
+        logo_content = "".join(line for line in f if not line.strip().startswith(("<?", "<!")))
+else:
+    logo_content = ""
+
 template = """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg
   PUBLIC '-//W3C//DTD SVG 1.1//EN'
@@ -25,10 +39,13 @@ template = """<?xml version="1.0" encoding="UTF-8"?>
 <g transform="translate(-10,0) scale(0.7, 1.2)">
 {bar}
 </g>
+<g transform="translate(215,15) scale(0.35,0.35)">
+{logo}
+</g>
 <g>
 <text
 x="255"
-y="61"
+y="85"
 style="fill:black;font-size:16pt;text-anchor:middle;"
 >
 {code}
@@ -41,4 +58,4 @@ for (dashed_code, code) in zip(dashed_codes, codes):
 
     with open(out_file,'w') as o:
         svg_content = "\n".join(svg.split("\n")[3:-2])
-        print(template.format(bar=svg_content,code=dashed_code),file=o)
+        print(template.format(bar=svg_content,code=dashed_code,logo=logo_content),file=o)
